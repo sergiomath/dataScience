@@ -1,0 +1,133 @@
+---
+title: "Taller 1:Diseño de experimentos"
+author: "Sergio Andres Diaz Vera"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(xtable)
+library(papaja)
+library(readxl)
+library(dplyr)
+library(Hmisc)
+library(ggplot2)
+library(summarytools)
+library(kableExtra)
+library(agricolae)
+library(nortest)
+library(PerformanceAnalytics)
+#install.packages("devtools",dependencies = T)
+library(devtools)
+#if (!require('devtools')) install.packages('devtools')
+#devtools::install_github('fhernanb/stests', force=TRUE)
+vBeta=data.frame(VBeta=c(100,102,130,140,150,160,90,103,95))
+vDelta=data.frame(VDelta=c(128,156,100,98,120,160,150,120,129,137,140))
+```
+# Análisis y Comparación
+En un estudio realizado en India en mayo de 2021 se quiería saber si hay diferencia significativa en la carga viral entre personas infectadas con Sars-Cov-2 con la variante beta y la variante delta.
+
+\begin{enumerate} 
+ \item Se procede a observar la carga viral entre personas infectadas  con la variante beta y delta
+\end{enumerate}
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrrrrrrrr}
+  \hline
+ & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 \\ 
+  \hline
+Variante Beta & 100 & 102 & 130 & 140 & 150 & 160 & 90 & 103 & 95 \\ 
+   \hline
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrrrrrrrrrr}
+  \hline
+ & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 \\ 
+  \hline
+Variante Delta & 128 & 156 & 100 & 98 & 120 & 160 & 150 & 120 & 129 & 137 & 140 \\ 
+   \hline
+\end{tabular}
+\end{table}
+### Análisis descriptivo Variante Beta
+
+Es posible observar , aunque con pocos datos , la variante beta posee un comportamiento normal además de no presentar datos atípicos (observado en el boxplot) presentando un sesgo a derecha y colas pesadas.
+```{r hist1,echo=F,fig.width=10, fig.height=5}
+par(mfrow = c(1, 2))
+
+  hist(vBeta$VBeta, prob = TRUE, main = "Histograma para Variante Beta", ylab = "Densidad",xlab = "Variante Beta")
+  x <- seq(min(vBeta$VBeta), max(vBeta$VBeta), length = 40)
+  f <- dnorm(x, mean = mean(vBeta$VBeta), sd = sd(vBeta$VBeta))
+  lines(x, f, col = "red", lwd = 2)
+  
+  boxplot(vBeta$VBeta,main="Diagrama de Caja Variante Beta",xlab = "Variante Beta")
+```
+\newpage
+
+Tabla 1 : Descripción numérica para la variante beta
+
+````{=tex}
+\begin{center}
+```{r beteatable, echo=FALSE, results='asis'}
+descripcion= data.frame(Promedio=mean(vBeta$VBeta),
+                         Mediana=median(vBeta$VBeta),
+                         Varianza=var(vBeta$VBeta),
+                         Desvi.Estandar=sd(vBeta$VBeta),
+                         Coef.Variación=sd(vBeta$VBeta)/ mean(vBeta$VBeta)*100,
+                         Q1=quantile(vBeta$VBeta,probs=0.25),
+                         Q2=quantile(vBeta$VBeta,probs=0.5),
+                         Q3=quantile(vBeta$VBeta,probs=0.75),
+                         Mínimo=min(vBeta$VBeta),
+                         Máximo=max(vBeta$VBeta) )
+row.names(descripcion)="Estimaciones"
+knitr::kable(t(descripcion),"latex",digits = 2)
+```
+\end{center}
+````
+### Análisis descriptivo Variante Delta
+
+
+Es posible observar , aunque con pocos datos , la variante beta posee un comportamiento normal además de no presentar datos atípicos (observado en el boxplot) presentando simetria.
+
+```{r hist2,echo=F,fig.width=10, fig.height=5}
+par(mfrow = c(1, 2))
+
+  hist(vDelta$VDelta, prob = TRUE, main = "Histograma para Variante Delta", ylab = "Densidad",xlab = "Variante Delta")
+  x <- seq(min(vDelta$VDelta), max(vDelta$VDelta), length = 40)
+  f <- dnorm(x, mean = mean(vDelta$VDelta), sd = sd(vDelta$VDelta))
+  lines(x, f, col = "red", lwd = 2)
+  
+  boxplot(vDelta$VDelta,main="Diagrama de Caja Variante Beta",xlab = "Variante Delta")
+```
+
+Tabla 2 : Descripción numérica para la Variante Delta
+
+````{=tex}
+\begin{center}
+```{r deltatable, echo=FALSE, results='asis'}
+descripcion= data.frame(Promedio=mean(vDelta$VDelta),
+                         Mediana=median(vDelta$VDelta),
+                         Varianza=var(vDelta$VDelta),
+                         Desvi.Estandar=sd(vDelta$VDelta),
+                         Coef.Variación=sd(vDelta$VDelta)/ mean(vDelta$VDelta)*100,
+                         Q1=quantile(vDelta$VDelta,probs=0.25),
+                         Q2=quantile(vDelta$VDelta,probs=0.5),
+                         Q3=quantile(vDelta$VDelta,probs=0.75),
+                         Mínimo=min(vDelta$VDelta),
+                         Máximo=max(vDelta$VDelta) )
+row.names(descripcion)="Estimaciones"
+knitr::kable(t(descripcion),"latex",digits = 2)
+```
+\end{center}
+````
+Del análsis descriptivo 
+
+```{r pressure, echo=FALSE}
+boxplot(vBeta,vDelta)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
