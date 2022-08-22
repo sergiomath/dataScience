@@ -20,6 +20,7 @@ library(nortest)
 library(PerformanceAnalytics)
 #install.packages("devtools",dependencies = T)
 library(devtools)
+library(pwr)
 #if (!require('devtools')) install.packages('devtools')
 #devtools::install_github('fhernanb/stests', force=TRUE)
 vBeta=data.frame(VBeta=c(100,102,130,140,150,160,90,103,95))
@@ -124,10 +125,59 @@ knitr::kable(t(descripcion),"latex",digits = 2)
 ```
 \end{center}
 ````
-Del análsis descriptivo 
+Del análsis descriptivo se observa una diferencia sustancial entre las medias y las varianzas de las personas  infectadas con la variante beta y delta . 
 
-```{r pressure, echo=FALSE}
-boxplot(vBeta,vDelta)
+## Test de Normalidad
+El test de Shapiro-Wilks plantea la hipótesis nula que una muestra proviene de una distribución normal. Se elige un nivel de significanza, por ejemplo 0,05, y tenemos una hipótesis alternativa que sostiene que la distribución no es normal.
+
+Así:
+
+$$H_0 : X \sim N(\mu,\sigma^2)$$
+$$H_1 : X\nsim N(\mu,\sigma^2)$$
+
+Ahora el test Shapiro-Wilks intenta rechazar la hipotesis nula al nivel de significancia y puesto que el tamaño de la muestra para ambos grupos es de menos de 50 individuos se usará  el test de normalidad 
+de Shapiro-Wilks al ser el mas potente.
+
+```{r normalT, echo=FALSE}
+shapiro.test(vBeta$VBeta)
+shapiro.test(vDelta$VDelta)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+dado los p-value de las pruebas  siendo 0.1469 para el grupo con la variante Beta y 0.6561 el grupo con la variante Delta  , con una significancia de 0.05 es posible decir que no 
+existe evidencia para rechazar la hipotesis nula de normalidad para cada grupo . Es decir con una confianza del $95\%$ los grupos se distribuyen aproxiamadamente normal.
+
+## Test de varianzas
+
+Al optener la normalidad de los grupos es posible  realizar la prueba F de comparación de varianzas para grupo normales
+
+```{r var, echo=FALSE}
+var.test(x=vBeta$VBeta,y=vDelta$VDelta)
+```
+
+El valor p de la prueba es de 0.4653, con una significancia de 0.05 no hay evidencia para rechazar la hipotesis nula de la igualdad de varianzas , es decir con una confianza del $95\%$
+los grupos provienen de poblaciones con varianzas iguales.
+
+## Test de Comparación de Medias con Varianzas iguales pero desconocidas
+
+Definamos las variables $X_1=$"cantidad de carga viral en personas infectadas con la variante Beta" y $X_1=$"cantidad de carga viral en personas infectadas con la variante Beta" 
+entonces sabemos por los puntos anteriores que $X_1\sim N(\mu_1,\sigma_1^2)$ y $X_2\sim N(\mu_2,\sigma_2^2)$ y además que $\sigma^2_1 = \sigma^2_2$ pero desconocidas , así se plantea el contraste de hipótesis:
+
+$$H_0:\mu_1-\mu_2=0\quad VS \quad H_1:\mu_1-\mu_2\neq0$$ 
+
+para hallar una diferencia significativa entre los grupos de personas infectadas , veamos el estadístico de prueba $$t_c=\frac{\bar{x}_1-\bar{x}_{2}-d_0}{S_p\sqrt{1/n_1+1/n_2}}$$ donde $S_p=\frac{(n_1-1)s_1^2+(n_1-1)s_2^2}{n_1+n_2-2}$
+al tener esto en cuenta se usará la prueba para comparación en R
+```{r meanT, echo=FALSE}
+t.test(vBeta$VBeta,vDelta$VDelta,var.equal = T)
+```
+puesto que el valor P es de 0.2732 con una significancia del 0.05 no hay evidencai para recahzar la hipótesisi nula de la igualdad de medias ,por lo tanto con una confianza del $95\%$ no existe evidencia significativa para decir que hay una cantidad media de particulas
+del virus en la variantes de cada grupo.
+
+## Poder estadśitico y tamaño del efecto
+
+```{r pw, echo=FALSE}
+pwr.t2n.test(power = 0.85,sig.level = 0.05,n1 = 9,n2 = 11)
+```
+El poder de la prueba realizada es de aproximadamente el $85\%$ es decir la probabilidad de rechazar la hipotesis nula cuando esta es falasa. 
+
+
+El tamaño del efecto representa el grado en que la hipótesis nula es falsa.El efecto de la prueba de medias para grupos independientes es  la de d de cohen calculada de la siguiente manera $$d=\frac{\bar{X}_1-\bar{X}_2}{S_{comun}} $$  donde $S_{comun}=\sqrt{\frac{(n_1-1)s_1^2+(n_2-1)s_2^2}{n_1+n_2-2}}=\sqrt{\frac{(9-1)26.28^2+(11-1)20.61^2}{9+11-2}}=23.3010$
