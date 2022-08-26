@@ -16,6 +16,8 @@ library(ggplot2)
 library(summarytools)
 library(kableExtra)
 library(agricolae)
+install.packages("aplore3")
+library(aplore3)
 library(nortest)
 library(PerformanceAnalytics)
 #install.packages("devtools",dependencies = T)
@@ -175,9 +177,25 @@ del virus en la variantes de cada grupo.
 ## Poder estadśitico y tamaño del efecto
 
 ```{r pw, echo=FALSE}
-pwr.t2n.test(power = 0.85,sig.level = 0.05,n1 = 9,n2 = 11)
+pwr.t2n.test(power = 0.6,sig.level = 0.05,n1 = 9,n2 = 11)
 ```
 El poder de la prueba realizada es de aproximadamente el $85\%$ es decir la probabilidad de rechazar la hipotesis nula cuando esta es falasa. 
 
 
 El tamaño del efecto representa el grado en que la hipótesis nula es falsa.El efecto de la prueba de medias para grupos independientes es  la de d de cohen calculada de la siguiente manera $$d=\frac{\bar{X}_1-\bar{X}_2}{S_{comun}} $$  donde $S_{comun}=\sqrt{\frac{(n_1-1)s_1^2+(n_2-1)s_2^2}{n_1+n_2-2}}=\sqrt{\frac{(9-1)26.28^2+(11-1)20.61^2}{9+11-2}}=23.3010$
+
+
+# Regresión Lineal
+
+El conjunto de datos lowbwt contiene información sobre 100 niños nacidos con bajo peso en Boston. Las medidas de presión sistólica están en la columna sbp y los valores de tiempo gestacional en gestage
+```{r}
+library(readr)
+lowbwttext <- read_delim("lowbwt.txt", delim = "\t", escape_double =FALSE, trigresion=lm(data = pesoBajo,sbp~gestate)
+summary(regresion)
+..........................................................................................................................................................................................................................................
+
+
+
+
+
+

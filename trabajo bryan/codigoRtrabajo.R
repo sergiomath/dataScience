@@ -11,9 +11,9 @@ library(PerformanceAnalytics)
 r_refs("r-references.bib")
 Base<- read_excel("baseTrabajo.xlsx")
 attach(Base)
-
+library(xtable)
 getwd()
-setwd(dir = "trabajo bryan")
+setwd(dir = "dataScience/trabajo bryan/")
 
 ######################################
 titulo="Edad (en años)"
@@ -152,3 +152,19 @@ var.test(mSi$`Promedio  Semestre`,mNO$`Promedio  Semestre`)
     ##hay diferencia significativa entre las medias de las personas que
     #ealizan actividades extracurriculares .
     
+############################################################
+    plot(x = factor(Base$Género), main = "Gráfica de Género",
+         xlab = "Género", ylab = "Frecuencia", 
+         col = c("royalblue", "seagreen"))
+      xtable(table(Base$Género) )  
+##############################################################
+      plot(x = factor(Base$`¿Realiza actividades extracurriculares?`), main = "Gráfica de Actividades Extracurriculares",
+           xlab = "Actividades Extra", ylab = "Frecuencia", 
+           col = c("royalblue", "seagreen"))
+      xtable(table(Base$`¿Realiza actividades extracurriculares?`) )  
+    
+####################################################################
+      plot(x = factor(Base$`¿Repasa los temas vistos en clase?`), main = "Gráfica de Repaso de temas",
+           xlab = "Repaso de temas", ylab = "Frecuencia", 
+           col = 1:5)
+        xtable(table(Base$Género) )  

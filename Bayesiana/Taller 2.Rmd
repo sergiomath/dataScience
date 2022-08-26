@@ -1,0 +1,72 @@
+---
+title: 'Taller 2: Estadística bayesiana'
+author: "Sergio Andres Diaz Vera"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document:
+    highlight: default
+    number_sections: yes
+    theme: cosmo
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)   
+```
+
+\begin{enumerate}
+
+\item Sean $x$, $y$, y $z$ variables aleatorias con función de densidad conjunta (discreta o continua) dada por $p(x,y,z) \propto             p(x,z)p(y,z)p(z)$. Muestre que:
+\begin{enumerate}
+  \item $p(x\mid y,z)\propto p(x,z)$, i.e., $p(x\mid y,z)$ es función de $x$ y $z$.
+  \item$p(y\mid x,z)\propto p(y,z)$, i.e., $p(y\mid x,z)$ es función de $y$ y $z$.    
+  \item $x$ y $y$ son condicionalmente independientes dado $z$.
+\end{enumerate}  
+\item Sean $A$, $B$, y $C$ proposiciones de falso-verdadero. Suponga que $A$ y $B$ son condicionalmente independientes, dado $C$. Muestre que:
+  \begin{enumerate}
+    \item $A$   y $B^C$ son condicionalmente independientes, dado $C$.	
+    \item $A^C$ y $B^C$ son condicionalmente independientes, dado $C$.
+  \end{enumerate}
+\item Sea $y\mid x\sim\textsf{Poi}(x)$ y $x\sim\textsf{Exp}(\lambda)$.
+    \begin{enumerate}
+       \item Muestre que la distribución marginal de $y$ es:
+$$
+p(y) = \frac{\lambda}{(\lambda+1)^{y+1}}\,,\qquad y = 0,1,\ldots\qquad\lambda>0\,.
+$$
+\textbf{Desarrollo:}
+
+veamos que si $y\mid x\sim\textsf{Poi}(x)$  entonces $p(y\mid x)=\frac{e^{-x}x^{y}}{y!}$  y $p(x)=\lambda e^{-\lambda x}$ así
+$$ p(y) = \stackrel{\text{Definición}}{\int_{\Theta} p(y,\theta)d \theta }=\int_{0}^{\infty}p(y \mid x)p(x)dx=\int_{0}^{\infty}\frac{e^{-x}x^{y}}{y!}\lambda e^{-\lambda  x}dx= \frac{\lambda}{y!}\int_{0}^{\infty} x^{y}e^{-(\lambda+1)x}dx$$ ahora que la integral toma la forma de la función de distribución de una distribución gamma la integral de esta es 1  
+$$ p(y)=\frac{\lambda}{y!} \frac{\Gamma (y+1)}{(\lambda +1)^{y+1}}  \stackrel{\text{Densidad distri Gamma =1}}{ \int_{0}^{\infty} \frac{(\lambda +1)^{y+1}}{\Gamma (y+1)} x^{(y+1)-1}e^{-(\lambda+1)x}dx}=\frac{\lambda}{y!} \frac{(y)!}{(\lambda +1)^{y+1}}=\frac{\lambda}{(\lambda +1)^{y+1}}
+$$
+\item Simule $N=100,000$ muestras independientes e idénticamente distribuidas de $y$ con $\lambda = 1$, y compare la distribución empírica correspondiente con la distribución exacta obtenida en el numeral anterior.
+\end{enumerate}
+\end{enumerate}
+
+\textbf{Desarrollo:} 
+```{python sim2,echo=F}
+#!pip install tabulate
+import numpy as np
+from tabulate import tabulate
+
+np.random.seed(1234)
+N=10000
+lambda_cons=1
+
+xSim=np.random.exponential(scale=lambda_cons,size=N)
+ySim=np.random.poisson(lam=xSim,size=N)
+pySimTotal=np.unique(ySim,return_counts=True)
+pySim=pySimTotal[1][:]*(1/N)
+pyExact=list(map(lambda y:lambda_cons/((lambda_cons+1)**(y+1)),pySimTotal[0]))
+diff=np.abs(pySim-pyExact)
+mostrar=np.vstack( [pySimTotal[0],pySim,pyExact,diff])
+print(tabulate(np.transpose(mostrar),headers=["y","Sim","Exact","Diff"]))
+```
+    
+\begin{enumerate}
+  \item[4.] Muestre que si $y\mid\theta$ tiene distribución exponencial con parámetro $\theta$, entonces la distribución $\textsf{Gamma}$ sirve como distribución previa conjugada para hacer inferencias sobre $\theta$, dada una muestra aleatoria de valores de $y$.
+\end{enumerate}
+
+\textbf{Desarrollo:}
+
+Se tiene que $y_i\mid \theta \stackrel{\text{iid}}{\sim} exp(\theta)$ y la distribución previa $\theta \sim Gamma(a,b)$
