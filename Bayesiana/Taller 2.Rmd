@@ -11,6 +11,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
+##install.packages("reticulate")
 knitr::opts_chunk$set(echo = FALSE)   
 ```
 
@@ -44,11 +45,14 @@ $$
 \end{enumerate}
 
 \textbf{Desarrollo:} 
+
 ```{python sim2,echo=F}
+
 #!pip install tabulate
+#!pip install matplotlib
 import numpy as np
 from tabulate import tabulate
-
+import matplotlib.pyplot as plt
 np.random.seed(1234)
 N=10000
 lambda_cons=1
@@ -61,6 +65,15 @@ pyExact=list(map(lambda y:lambda_cons/((lambda_cons+1)**(y+1)),pySimTotal[0]))
 diff=np.abs(pySim-pyExact)
 mostrar=np.vstack( [pySimTotal[0],pySim,pyExact,diff])
 print(tabulate(np.transpose(mostrar),headers=["y","Sim","Exact","Diff"]))
+
+width=0.4
+plt.bar(pySimTotal[0],pySim,width=width,label='Simulacion')
+plt.bar(pySimTotal[0]+width,pyExact,width=width,label='Exacta')
+plt.xticks()
+plt.legend(loc='best')
+plt.xlabel(r'$\theta$')
+plt.ylabel(r'$p(\theta)$')
+plt.show()
 ```
     
 \begin{enumerate}
@@ -69,4 +82,24 @@ print(tabulate(np.transpose(mostrar),headers=["y","Sim","Exact","Diff"]))
 
 \textbf{Desarrollo:}
 
-Se tiene que $y_i\mid \theta \stackrel{\text{iid}}{\sim} exp(\theta)$ y la distribución previa $\theta \sim Gamma(a,b)$
+Se tiene que $y_i\mid \theta \stackrel{\text{iid}}{\sim} exp(\theta)$ y la distribución previa $\theta \sim Gamma(a,b)$ entonces $$ p(y \mid \theta)=\theta e^{-\theta y} \quad \text{ y ademas} \quad p(\theta)=\frac{b^a}{\Gamma (a)}\theta^{a-1}e^{-b\theta}$$
+
+así $s=\sum_{i=1}^ny_i$ estadístico suficiente  y la distribución a posterior sera $$p(\theta \mid \boldsymbol{y}) =  \stackrel{\text{T.Bayes}}{\frac{p(\boldsymbol{y}\mid \theta)p(\theta)}{p(\boldsymbol{y})}}$$  luego $$p(\boldsymbol{y})=\int_\Theta p(\boldsymbol{y},\theta) d\theta = \int_\Theta p(\boldsymbol{y} \mid \theta )p(\theta)d\theta =\int_0 ^\infty \theta^n e^{-\sum y_i \theta}[\frac{b^a}{\Gamma (a)}\theta^{a-1}e^{-b\theta}]d\theta=\frac{b^a}{\Gamma (a)}\int_0 ^\infty \theta^{(a+n)-1}e^{-(b+s)\theta}d\theta$$  
+recordando la forma de la densidad de una distribución gamma completamos de la siguiente forma:
+
+\begin{align}
+p(\boldsymbol{y})=& \frac{b^a}{\Gamma (a)}\int_0 ^\infty \theta^{(a+n)-1}e^{-(b+s)\theta}d\theta \\
+                =& \frac{b^a}{\Gamma (a)}\frac{\Gamma (a+n) }{(b+s)^{(a+n)}} \stackrel{\text{Densidad Gamma}}{ \int_0 ^\infty \frac{(b+s)^{(a+n)}} {\Gamma (a+n) }\theta^{(a+n)-1}e^{-(b+s)\theta}d\theta }  \\
+                =& \frac{b^a}{\Gamma (a)}\frac{\Gamma (a+n) }{(b+s)^{(a+n)}} 
+\end{align}
+
+luego usando el teorema de Bayes
+
+\begin{align}
+  p(\theta \mid \boldsymbol{y}) = & \stackrel{\text{T.Bayes}}{\frac{p(\boldsymbol{y}\mid \theta)p(\theta)}{p(\boldsymbol{y})}} \\
+                              = &\frac{\theta^n e^{-s\theta}\frac{b^a}{\Gamma (a)}\theta^{a-1}e^{-b\theta}}{\frac{b^a}{\Gamma (a)}\frac{\Gamma (a+n) }{(b+s)^{(a+n)}} } \quad \text{cancelando}\\
+                              =&\frac{(b+s)^{(a+n)}}{\Gamma (a+n) }\theta^{(a+n)-1} e^{-(b+s) \theta}\\
+                              \theta \mid \boldsymbol{y} \sim Gamma(a+n,b+s.)
+\end{align}
+
+entonces la distribución $\textsf{Gamma}$ sirve como distribución previa conjugada para hacer inferencias sobre $\theta$.
