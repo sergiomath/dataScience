@@ -1,19 +1,74 @@
----
-title: 'Taller 2: Estadística bayesiana'
-author: "Sergio Andres Diaz Vera"
-date: "`r Sys.Date()`"
-output:
-  pdf_document: default
-  html_document:
-    highlight: default
-    number_sections: yes
-    theme: cosmo
----
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdftitle={Taller 2: Estadística bayesiana},
+  pdfauthor={Sergio Andres Diaz Vera},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
 
-```{r setup, include=FALSE}
-##install.packages("reticulate")
-knitr::opts_chunk$set(echo = FALSE)   
-```
+\title{Taller 2: Estadística bayesiana}
+\author{Sergio Andres Diaz Vera}
+\date{2022-08-29}
+
+\begin{document}
+\maketitle
 
 \begin{enumerate}
 
@@ -25,7 +80,7 @@ knitr::opts_chunk$set(echo = FALSE)
 \end{enumerate}  
 \item Sean $A$, $B$, y $C$ proposiciones de falso-verdadero. Suponga que $A$ y $B$ son condicionalmente independientes, dado $C$. Muestre que:
   \begin{enumerate}
-    \item $A$   y $B^C$ son condicionalmente independientes, dado $C$.	
+    \item $A$   y $B^C$ son condicionalmente independientes, dado $C$.  
     \item $A^C$ y $B^C$ son condicionalmente independientes, dado $C$.
   \end{enumerate}
 \item Sea $y\mid x\sim\textsf{Poi}(x)$ y $x\sim\textsf{Exp}(\lambda)$.
@@ -44,50 +99,59 @@ $$
 \end{enumerate}
 \end{enumerate}
 
-\textbf{Desarrollo:} 
+\textbf{Desarrollo:}
 
-```{python sim2,echo=F}
+\begin{verbatim}
+##   y     Sim        Exact         Diff
+## ---  ------  -----------  -----------
+##   0  0.5039  0.5          0.0039
+##   1  0.2432  0.25         0.0068
+##   2  0.123   0.125        0.002
+##   3  0.0672  0.0625       0.0047
+##   4  0.0312  0.03125      5e-05
+##   5  0.0157  0.015625     7.5e-05
+##   6  0.0082  0.0078125    0.0003875
+##   7  0.0034  0.00390625   0.00050625
+##   8  0.0017  0.00195312   0.000253125
+##   9  0.0012  0.000976562  0.000223438
+##  10  0.0005  0.000488281  1.17188e-05
+##  11  0.0001  0.000244141  0.000144141
+##  12  0.0005  0.00012207   0.00037793
+##  13  0.0001  6.10352e-05  3.89648e-05
+##  14  0.0001  3.05176e-05  6.94824e-05
+\end{verbatim}
 
-#!pip install tabulate
-#!pip install matplotlib
-import numpy as np
-from tabulate import tabulate
-import matplotlib.pyplot as plt
-np.random.seed(1234)
-N=10000
-lambda_cons=1
+\begin{verbatim}
+## <BarContainer object of 15 artists>
+\end{verbatim}
 
-xSim=np.random.exponential(scale=lambda_cons,size=N)
-ySim=np.random.poisson(lam=xSim,size=N)
-pySimTotal=np.unique(ySim,return_counts=True)
-pySim=pySimTotal[1][:]*(1/N)
-pyExact=list(map(lambda y:lambda_cons/((lambda_cons+1)**(y+1)),pySimTotal[0]))
-diff=np.abs(pySim-pyExact)
-mostrar=np.vstack( [pySimTotal[0],pySim,pyExact,diff])
-print(tabulate(np.transpose(mostrar),headers=["y","Sim","Exact","Diff"]))
+\begin{verbatim}
+## <BarContainer object of 15 artists>
+\end{verbatim}
 
-width=0.4
-plt.bar(pySimTotal[0],pySim,width=width,label='Simulacion')
-plt.bar(pySimTotal[0]+width,pyExact,width=width,label='Exacta')
-plt.xticks()
-plt.legend(loc='best')
-plt.xlabel(r'$\theta$')
-plt.ylabel(r'$p(\theta)$')
-plt.show()
-```
+\begin{verbatim}
+## (array([-2.,  0.,  2.,  4.,  6.,  8., 10., 12., 14., 16.]), [Text(0, 0, ''), Text(0, 0, ''), Text(0, 0, ''), Text(0, 0, ''), Text(0, 0, ''), Text(0, 0, ''), Text(0, 0, ''), Text(0, 0, ''), Text(0, 0, ''), Text(0, 0, '')])
+\end{verbatim}
 
+\includegraphics{Taller-2_files/figure-latex/sim2-1.pdf}
 
-    
 \begin{enumerate}
   \item[4.] Muestre que si $y\mid\theta$ tiene distribución exponencial con parámetro $\theta$, entonces la distribución $\textsf{Gamma}$ sirve como distribución previa conjugada para hacer inferencias sobre $\theta$, dada una muestra aleatoria de valores de $y$.
 \end{enumerate}
 
 \textbf{Desarrollo:}
 
-Se tiene que $y_i\mid \theta \stackrel{\text{iid}}{\sim} exp(\theta)$ y la distribución previa $\theta \sim Gamma(a,b)$ entonces $$ p(y \mid \theta)=\theta e^{-\theta y} \quad \text{ y ademas} \quad p(\theta)=\frac{b^a}{\Gamma (a)}\theta^{a-1}e^{-b\theta}$$
+Se tiene que \(y_i\mid \theta \stackrel{\text{iid}}{\sim} exp(\theta)\)
+y la distribución previa \(\theta \sim Gamma(a,b)\) entonces
+\[ p(y \mid \theta)=\theta e^{-\theta y} \quad \text{ y ademas} \quad p(\theta)=\frac{b^a}{\Gamma (a)}\theta^{a-1}e^{-b\theta}\]
 
-así $s=\sum_{i=1}^ny_i$ estadístico suficiente  y la distribución a posterior sera $$p(\theta \mid \boldsymbol{y}) =  \stackrel{\text{T.Bayes}}{\frac{p(\boldsymbol{y}\mid \theta)p(\theta)}{p(\boldsymbol{y})}}$$  luego $$p(\boldsymbol{y})=\int_\Theta p(\boldsymbol{y},\theta) d\theta = \int_\Theta p(\boldsymbol{y} \mid \theta )p(\theta)d\theta =\int_0 ^\infty \theta^n e^{-\sum y_i \theta}[\frac{b^a}{\Gamma (a)}\theta^{a-1}e^{-b\theta}]d\theta=\frac{b^a}{\Gamma (a)}\int_0 ^\infty \theta^{(a+n)-1}e^{-(b+s)\theta}d\theta$$  
-recordando la forma de la densidad de una distribución gamma completamos de la siguiente forma:
+así \(s=\sum_{i=1}^ny_i\) estadístico suficiente y la distribución a
+posterior sera
+\[p(\theta \mid \boldsymbol{y}) =  \stackrel{\text{T.Bayes}}{\frac{p(\boldsymbol{y}\mid \theta)p(\theta)}{p(\boldsymbol{y})}}\]
+luego
+\[p(\boldsymbol{y})=\int_\Theta p(\boldsymbol{y},\theta) d\theta = \int_\Theta p(\boldsymbol{y} \mid \theta )p(\theta)d\theta =\int_0 ^\infty \theta^n e^{-\sum y_i \theta}[\frac{b^a}{\Gamma (a)}\theta^{a-1}e^{-b\theta}]d\theta=\frac{b^a}{\Gamma (a)}\int_0 ^\infty \theta^{(a+n)-1}e^{-(b+s)\theta}d\theta\]\\
+recordando la forma de la densidad de una distribución gamma completamos
+de la siguiente forma:
 
 \begin{align}
 p(\boldsymbol{y})=& \frac{b^a}{\Gamma (a)}\int_0 ^\infty \theta^{(a+n)-1}e^{-(b+s)\theta}d\theta \\
@@ -104,7 +168,8 @@ luego usando el teorema de Bayes
                               \theta \mid \boldsymbol{y} \sim Gamma(a+n,b+s.)
 \end{align}
 
-entonces la distribución $\textsf{Gamma}$ sirve como distribución previa conjugada para hacer inferencias sobre $\theta$.
+entonces la distribución \(\textsf{Gamma}\) sirve como distribución
+previa conjugada para hacer inferencias sobre \(\theta\).
 
 \begin{enumerate}
 \item[5.]
@@ -134,21 +199,9 @@ Suponga que Su estado de información previo para $\theta$, la proporción de in
     
   \end{enumerate}
 \end{enumerate}
-```{python p5,fig.width=3,fig.heigth=2}
-from scipy import stats
-import matplotlib.pyplot as plt
-import numpy as np
-#!pip install scipy
-a=1
-b=2/3
-x=np.arange(0,1,0.001)
-y=stats.beta.pdf(x,a,b)
-plt.plot(x,y)
-plt.title('Función de Masa de Probabilidad Beta a=1 , b=2/3')
-plt.ylabel('probabilidad')
-plt.xlabel('valores')
-plt.show()
-```
+
+\includegraphics{Taller-2_files/figure-latex/p5-3.pdf}
+
 \begin{enumerate}
   \item[(b)] Se toma una muestra aleatoria de 1,000 californianos y el $65\%$ apoya la pena de muerte. Calcule tanto la media     como la desviación estándar posterior para $\theta$. Dibuje la función de densidad posterior correspondiente.
     
@@ -158,23 +211,9 @@ plt.show()
       
     Además tenemos que el valor esperado es $E(s\mid \theta)= \frac{651}{651+351}=0.6497$  y la $Var(s\mid \theta)=\frac{(651)(351)}{(651+351)^2(651+351+1)}=0.0002269$ 
       
-```{python fig3}
-a=1
-b=2/3
-n=1000
-s=650
-ap=a+s
-bp=b+n-s
-mediaP=ap/(ap+bp) 
-varP=(ap*bp)/((ap+bp)**2*(ap+bp+1))
-xp=np.arange(0,1,0.001)
-yp=stats.beta.pdf(x,ap,bp)
-plt.plot(xp,yp)
-plt.title("Función de Masa de Probabilidad posterior Beta a=651 , b=350.66")
-plt.ylabel(r'$p(\theta \mid s) $')
-plt.xlabel(r'$\theta $')
-plt.show()
-```
+![](Taller-2_files/figure-latex/fig3-5.pdf)<!-- --> 
   
       
 \end{enumerate}
+
+\end{document}
