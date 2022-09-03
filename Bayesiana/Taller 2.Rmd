@@ -14,7 +14,6 @@ output:
 ##install.packages("reticulate")
 knitr::opts_chunk$set(echo = FALSE)   
 ```
-
 \begin{enumerate}
 
 \item Sean $x$, $y$, y $z$ variables aleatorias con función de densidad conjunta (discreta o continua) dada por $p(x,y,z) \propto             p(x,z)p(y,z)p(z)$. Muestre que:
@@ -46,8 +45,7 @@ $$
 
 \textbf{Desarrollo:} 
 
-```{python sim2,echo=F}
-
+```{python sim1,echo=F,message=FALSE}
 #!pip install tabulate
 #!pip install matplotlib
 import numpy as np
@@ -65,7 +63,12 @@ pyExact=list(map(lambda y:lambda_cons/((lambda_cons+1)**(y+1)),pySimTotal[0]))
 diff=np.abs(pySim-pyExact)
 mostrar=np.vstack( [pySimTotal[0],pySim,pyExact,diff])
 print(tabulate(np.transpose(mostrar),headers=["y","Sim","Exact","Diff"]))
+```
 
+Veamos gráficamente este hecho
+
+
+```{python sim2,results="hide"}
 width=0.4
 plt.bar(pySimTotal[0],pySim,width=width,label='Simulacion')
 plt.bar(pySimTotal[0]+width,pyExact,width=width,label='Exacta')
@@ -134,7 +137,8 @@ Suponga que Su estado de información previo para $\theta$, la proporción de in
     
   \end{enumerate}
 \end{enumerate}
-```{python p5,fig.width=3,fig.heigth=2}
+
+```{python p5,}
 from scipy import stats
 import matplotlib.pyplot as plt
 import numpy as np
@@ -157,8 +161,8 @@ plt.show()
       Se tiene que la distribución muestral $s \mid \theta \sim binomial (n=1000,p=0.65)$ y $\theta\sim               beta(a=1,b=\frac{2}{3})$  por el modelo beta-binomial se tiene que la distribución posterior es $beta(1+650,1+350)$ donde $s=650$
       
     Además tenemos que el valor esperado es $E(s\mid \theta)= \frac{651}{651+351}=0.6497$  y la $Var(s\mid \theta)=\frac{(651)(351)}{(651+351)^2(651+351+1)}=0.0002269$ 
-      
-```{python fig3}
+\end{enumerate}
+```{python fig3,fig.width=1}
 a=1
 b=2/3
 n=1000
@@ -170,11 +174,8 @@ varP=(ap*bp)/((ap+bp)**2*(ap+bp+1))
 xp=np.arange(0,1,0.001)
 yp=stats.beta.pdf(x,ap,bp)
 plt.plot(xp,yp)
-plt.title("Función de Masa de Probabilidad posterior Beta a=651 , b=350.66")
+plt.title("fmp posterior Beta (a=651 , b=350.66)")
 plt.ylabel(r'$p(\theta \mid s) $')
 plt.xlabel(r'$\theta $')
 plt.show()
 ```
-  
-      
-\end{enumerate}
